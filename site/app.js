@@ -187,13 +187,21 @@ async function viewSpecial(pref, no) {
   setStep("特別地方公共団体");
   if (!pref) { viewPrefs("特別地方公共団体", "#tk"); app.querySelector("#skip").onclick = () => skipTo("TK"); return; }
   const all = (await need("special")).filter((s) => s.pref === pref);
-  if (no) {
-    const s = all.find((x) => x.no === no);
-    if (!s) { go(`#tk/${encodeURIComponent(pref)}`); return; }
-    const web = s.web ? s.web.slice(2) : "";
-    const src = s.src[0];
-    app.innerHTML = h`
-      <a class="btn" href="#tk/${encodeURIComponent(pref)}">← 一覧へ</a>
+  const opts = {
+    title: `特別地方公共団体（${pref}）`, back: "#tk", placeholder: "名称・市町村名で絞り込み", unit: "団体",
+    rows: [...all].sort((a, b) => a.name.localeCompare(b.name, "ja")),
+    match: (s, q) => s.name.includes(q) || s.muni.includes(q),
+    name: (s) => s.name, sub: (s) => `${SL_KIND[s.kind] ?? "その他"}　代表: ${slRep(s)}`,
+    href: (s) => `#tk/${encodeURIComponent(pref)}/${s.no}`,
+  };
+  if (!no) { splitView(opts, null); return; }
+  const s = all.find((x) => x.no === no);
+  if (!s) { go(`#tk/${encodeURIComponent(pref)}`); return; }
+  const web = s.web ? s.web.slice(2) : "";
+  const src = s.src[0];
+  splitView(opts, (root) => {
+    root.innerHTML = h`
+      <a class="btn back-list" href="#tk/${encodeURIComponent(pref)}">← 一覧へ</a>
       <h1>${esc(s.name)}</h1>
       <p class="muted">${esc(SL_KIND[s.kind] ?? "その他")}　法人番号 ${esc(s.no)}<br>${esc(s.addr)}</p>
       <div class="card"><dl>
@@ -209,7 +217,7 @@ async function viewSpecial(pref, no) {
       </div>
       <div class="btns"><button type="button" class="btn primary" id="go">この団体で判定する →</button>
         <a class="btn small" target="_blank" rel="noopener" href="${esc(reportUrl(`特別地方公共団体 ${s.no} ${s.name}（${s.pref}）`, s.name))}">この団体の情報の誤りを報告</a></div>`;
-    app.querySelector("#go").onclick = () => {
+    root.querySelector("#go").onclick = () => {
       const sl = { ...s, rep: slRep(s) };
       S.ctx = { sl };
       const auto = [{ q: "TK-K", a: s.kind, label: SL_KIND_LONG[s.kind] ?? "", cond: "", ord: 10 }];
@@ -220,37 +228,57 @@ async function viewSpecial(pref, no) {
       startType("TK", auto);
       go("#t/TK");
     };
-    return;
-  }
-  listView({
-    title: `特別地方公共団体（${pref}）`, back: "#tk", placeholder: "名称・市町村名で絞り込み", unit: "団体",
-    rows: [...all].sort((a, b) => a.name.localeCompare(b.name, "ja")),
-    match: (s, q) => s.name.includes(q) || s.muni.includes(q),
-    name: (s) => s.name, sub: (s) => `${SL_KIND[s.kind] ?? "その他"}　代表: ${slRep(s)}`,
-    href: (s) => `#tk/${encodeURIComponent(pref)}/${s.no}`,
   });
+
 }
 
-// 絞り込みできる一覧（共通）
+// 絞り込みできる一覧（共通）。o.el を渡すとその中に描く（広い画面の左側）
 function listView(o) {
-  app.innerHTML = h`<h1>${esc(o.title)}</h1>
+  const el = o.el ?? app;
+  S.listQ ??= {};
+  S.listTop ??= {};
+  el.innerHTML = h`<h1>${esc(o.title)}</h1>
     <div class="searchbar"><input type="search" id="q" placeholder="${esc(o.placeholder)}" aria-label="${esc(o.placeholder)}">
       <span class="count" id="cnt"></span></div>
     <ul class="list" id="lst"></ul>
     <div class="btns"><a class="btn" href="${o.back}">← 戻る</a>${o.extra ?? ""}</div>`;
-  const q = app.querySelector("#q"), lst = app.querySelector("#lst"), cnt = app.querySelector("#cnt");
+  const q = el.querySelector("#q"), lst = el.querySelector("#lst"), cnt = el.querySelector("#cnt");
+  q.value = S.listQ[o.title] ?? "";
   const draw = () => {
     const k = q.value.trim();
+    S.listQ[o.title] = q.value;
     const rows = k ? o.rows.filter((r) => o.match(r, k)) : o.rows;
     cnt.textContent = `${rows.length} ${o.unit}`;
-    lst.innerHTML = rows.slice(0, 400).map((r) => h`<li><a class="row" style="display:block;text-decoration:none;color:inherit;padding:0.7em 0.9em" href="${o.href(r)}">
-      <div class="name">${esc(o.name(r))}</div><div class="sub">${esc(o.sub(r))}</div></a></li>`).join("") +
+    lst.innerHTML = rows.slice(0, 400).map((r) => {
+      const href = o.href(r), cur = href === location.hash;
+      return h`<li><a class="row${cur ? " active" : ""}"${cur ? ' aria-current="true"' : ""} style="display:block;text-decoration:none;color:inherit;padding:0.7em 0.9em" href="${href}">
+      <div class="name">${esc(o.name(r))}</div><div class="sub">${esc(o.sub(r))}</div></a></li>`;
+    }).join("") +
       (rows.length > 400 ? `<li class="muted" style="padding:0.6em 0.9em">先頭 400 件を表示しています。絞り込んでください。</li>` : "");
   };
   q.oninput = draw;
   draw();
+  if (o.el) {  // 左の一覧のスクロール位置を、詳細を切り替えても保つ
+    el.scrollTop = S.listTop[o.title] ?? 0;
+    el.onscroll = () => { S.listTop[o.title] = el.scrollTop; };
+  }
   o.after?.();
 }
+
+// 広い画面では左に一覧・右に詳細、狭い画面では一覧と詳細を別の画面にする
+const WIDE = window.matchMedia("(min-width: 1100px)");
+function splitView(opts, renderDetail) {
+  if (!WIDE.matches) {
+    if (renderDetail) renderDetail(app); else listView(opts);
+    return;
+  }
+  app.innerHTML = '<div class="split"><section class="pane-l" id="paneL"></section><section class="pane-r" id="paneR"></section></div>';
+  listView({ ...opts, el: app.querySelector("#paneL") });
+  const r = app.querySelector("#paneR");
+  if (renderDetail) renderDetail(r);
+  else r.innerHTML = '<p class="muted pick">左の一覧から選ぶと、ここに詳細が出ます。</p>';
+}
+WIDE.addEventListener("change", () => { if (/^#(tk|et|ke)\//.test(location.hash) || location.hash === "#et") render(); });
 
 // ------------------------------------------------------------ 画面: その他の法人
 const ET_TK = { M: "役員（元役員を含む）との訴え等に特則", C: "現在の代表者との利益相反事項だけに特則",
@@ -258,11 +286,19 @@ const ET_TK = { M: "役員（元役員を含む）との訴え等に特則", C: 
 async function viewCorp(code) {
   setStep("その他の法人");
   const all = await need("corps");
-  if (code) {
-    const c = all.find((x) => x.code === code);
-    if (!c) { go("#et"); return; }
-    app.innerHTML = h`
-      <a class="btn" href="#et">← 一覧へ</a>
+  const opts = {
+    title: "その他の法人", back: "#", placeholder: "名称・根拠法・代表者で絞り込み", unit: "件", rows: all,
+    match: (c, q) => c.name.includes(q) || c.law.includes(q) || c.rep.includes(q),
+    name: (c) => c.name, sub: (c) => `${c.law}　代表: ${c.rep}`, href: (c) => `#et/${c.code}`,
+    extra: '<button type="button" class="btn" id="skip">一覧にない法人として判定</button>',
+    after: () => { app.querySelector("#skip").onclick = () => skipTo("ET"); },
+  };
+  if (!code) { splitView(opts, null); return; }
+  const c = all.find((x) => x.code === code);
+  if (!c) { go("#et"); return; }
+  splitView(opts, (root) => {
+    root.innerHTML = h`
+      <a class="btn back-list" href="#et">← 一覧へ</a>
       <h1>${esc(c.name)}</h1>
       <p class="muted">${esc(c.grp_label)}　${esc(c.law)}</p>
       <div class="card"><dl>
@@ -276,7 +312,7 @@ async function viewCorp(code) {
       </dl></div>
       <div class="btns"><button type="button" class="btn primary" id="go">この法人で判定する →</button>
         <a class="btn small" target="_blank" rel="noopener" href="${esc(reportUrl(`その他の法人 ${c.code} ${c.name}`, c.name))}">この法人の情報の誤りを報告</a></div>`;
-    app.querySelector("#go").onclick = () => {
+    root.querySelector("#go").onclick = () => {
       S.ctx = { corp: c };
       const kk = c.name === "国家公務員共済組合";
       const auto = [{ q: "ET-L", a: kk ? "K" : "L", label: `一覧から選んだ（${c.name}）`, cond: "", ord: 10 }];
@@ -284,15 +320,8 @@ async function viewCorp(code) {
       startType("ET", auto);
       go("#t/ET");
     };
-    return;
-  }
-  listView({
-    title: "その他の法人", back: "#", placeholder: "名称・根拠法・代表者で絞り込み", unit: "件", rows: all,
-    match: (c, q) => c.name.includes(q) || c.law.includes(q) || c.rep.includes(q),
-    name: (c) => c.name, sub: (c) => `${c.law}　代表: ${c.rep}`, href: (c) => `#et/${c.code}`,
-    extra: '<button type="button" class="btn" id="skip">一覧にない法人として判定</button>',
-    after: () => { app.querySelector("#skip").onclick = () => skipTo("ET"); },
   });
+
 }
 
 // ------------------------------------------------------------ 画面: 地方公営企業
@@ -300,12 +329,20 @@ async function viewKoei(pref, code) {
   setStep("地方公営企業");
   if (!pref) { viewPrefs("地方公営企業", "#ke"); app.querySelector("#skip").onclick = () => skipTo("KE"); return; }
   const all = (await need("koei")).filter((k) => k.pref === pref);
-  if (code) {
-    const k = all.find((x) => x.code === code);
-    if (!k) { go(`#ke/${encodeURIComponent(pref)}`); return; }
-    const jig1 = k.jig.startsWith("（") ? "" : k.jig.split("・")[0] + "事業";
-    app.innerHTML = h`
-      <a class="btn" href="#ke/${encodeURIComponent(pref)}">← 一覧へ</a>
+  const opts = {
+    title: `地方公営企業（${pref}）`, back: "#ke", placeholder: "団体名・事業・条例名で絞り込み", unit: "件",
+    rows: [...all].sort((a, b) => (a.kind === b.kind ? a.dan.localeCompare(b.dan, "ja") : a.kind === "P" ? -1 : 1)),
+    match: (k, q) => k.dan.includes(q) || k.jig.includes(q) || k.title.includes(q),
+    name: (k) => `${k.dan}　${k.jig}`, sub: (k) => `${k.rep}　${k.title}`,
+    href: (k) => `#ke/${encodeURIComponent(pref)}/${k.code}`,
+  };
+  if (!code) { splitView(opts, null); return; }
+  const k = all.find((x) => x.code === code);
+  if (!k) { go(`#ke/${encodeURIComponent(pref)}`); return; }
+  const jig1 = k.jig.startsWith("（") ? "" : k.jig.split("・")[0] + "事業";
+  splitView(opts, (root) => {
+    root.innerHTML = h`
+      <a class="btn back-list" href="#ke/${encodeURIComponent(pref)}">← 一覧へ</a>
       <h1>${esc(k.dan)}　${esc(k.jig)}</h1>
       <p class="muted">${esc(k.title)}</p>
       <div class="card"><dl>
@@ -322,7 +359,7 @@ async function viewKoei(pref, code) {
       </div>
       <div class="btns"><button type="button" class="btn primary" id="go">この公営企業で判定する →</button>
         <a class="btn small" target="_blank" rel="noopener" href="${esc(reportUrl(`地方公営企業 ${k.code} ${k.dan}（${k.pref}）${k.jig}／${k.title}`, k.dan + " " + k.jig))}">この行の誤りを報告</a></div>`;
-    app.querySelector("#go").onclick = () => {
+    root.querySelector("#go").onclick = () => {
       S.ctx = { ke: k };
       const ck = k.kind === "P" ? "P" : ({ 市: "C", 町: "T", 村: "V", 区: "W" }[k.dan.slice(-1)] ?? "C");
       const bk = k.rep === "管理者" ? "M" : k.rep === "長" ? "N" : "";
@@ -332,15 +369,8 @@ async function viewKoei(pref, code) {
       startType("KE", auto);
       go("#t/KE");
     };
-    return;
-  }
-  listView({
-    title: `地方公営企業（${pref}）`, back: "#ke", placeholder: "団体名・事業・条例名で絞り込み", unit: "件",
-    rows: [...all].sort((a, b) => (a.kind === b.kind ? a.dan.localeCompare(b.dan, "ja") : a.kind === "P" ? -1 : 1)),
-    match: (k, q) => k.dan.includes(q) || k.jig.includes(q) || k.title.includes(q),
-    name: (k) => `${k.dan}　${k.jig}`, sub: (k) => `${k.rep}　${k.title}`,
-    href: (k) => `#ke/${encodeURIComponent(pref)}/${k.code}`,
   });
+
 }
 
 // ------------------------------------------------------------ 画面: 要件に答える＋結果
@@ -453,7 +483,7 @@ async function render() {
   } catch (e) {
     app.innerHTML = `<p class="notice">エラー: ${esc(e.message)}</p>`;
   }
-  if (!parts[0] || parts[0] !== "t") window.scrollTo(0, 0);
+  if ((!parts[0] || parts[0] !== "t") && !app.querySelector(".split")) window.scrollTo(0, 0);
 }
 window.addEventListener("hashchange", render);
 document.getElementById("home-link").onclick = (e) => { e.preventDefault(); go("#"); };
