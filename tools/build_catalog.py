@@ -17,24 +17,26 @@ GRP = [  # (区分の内部名, アプリで表示する短い名称, コード�
     ("KUMIAI", "組合等登記令の法人", "K"),
     ("JIKO", "根拠法で登記する法人", "J"),
     ("ADMIN", "管理処分中の法人", "X"),
+    ("ZAISAN", "法律上当然に成立する財産の法人", "Z"),
 ]
 GRP_LABEL = {k: v for k, v, _ in GRP}
 GRP_PREFIX = {k: c for k, _, c in GRP}
 CSV_LABEL = {"MUTOKI": "登記なし", "DOKUHO": "独立行政法人等登記令（別表）", "KUMIAI": "組合等登記令（別表）",
-             "JIKO": "根拠法に登記規定", "ADMIN": "管理処分中の特例"}
+             "JIKO": "根拠法に登記規定", "ADMIN": "管理処分中の特例",
+             "ZAISAN": "法律上当然に成立（財産の法人）"}
 
 # 法人名がそのまま 1 つに決まるもの（表示例の法人名に入れる）
-UNIQUE = {"日本商工会議所", "農林中央金庫", "中央職業能力開発協会", "原子力発電環境整備機構",
+UNIQUE = {"日本弁護士連合会", "日本商工会議所", "農林中央金庫", "中央職業能力開発協会", "原子力発電環境整備機構",
           "使用済燃料再処理・廃炉推進機構", "健康保険組合連合会", "企業年金連合会", "国民年金基金連合会"}
 
 
 def title_of(rep):
     """代表者の欄から、表示例の「同代表者○○」に入れる資格を決める"""
-    for t in ("理事長", "会長", "会頭", "総裁", "社長", "委員長", "代表理事", "金融整理管財人", "預金保険機構",
-              "保険管理人", "管理人"):
+    for t in ("理事長", "会長", "会頭", "総裁", "社長", "委員長", "代表理事", "代表取締役", "執行役員", "相続財産清算人",
+              "信託財産法人管理人", "代表者", "金融整理管財人", "預金保険機構", "保険管理人", "管理人"):
         if rep.startswith(t):
             return t
-    if rep.startswith("組合を代表する理事"):
+    if rep.startswith(("組合を代表する理事", "酒類業組合を代表する理事")):
         return "代表理事"
     if "社員" in rep:
         return "代表社員"
@@ -58,13 +60,15 @@ def catalog_rows():
     ns = _load()
     out = []
 
-    def add(g, name, law, rep, basis, conf, reg, docs, note, ok):
+    def add(g, name, law, rep, basis, conf, reg, docs, note, ok, day="2026-11-20"):
         out.append(dict(grp=g, name=name, law=law, rep=rep, basis=basis, conf=conf, reg=reg, docs=docs,
-                        note=note, src="確認済（2026-11-20）" if ok else "要確認"))
+                        note=note, src=f"確認済（{day}）" if ok else "要確認"))
 
     for r in ns["ROWS"]:
+        if r["grp"] != "MUTOKI":
+            continue
         add("MUTOKI", r["name"], r["law"], r["rep"], r["rep_b"], r["conflict"], r["reg"], r["docs"], r["note"],
-            r["ok"])
+            r["ok"], r["day"])
     for name, law in ns["DOKUHO_TABLE"]:
         rep, basis, conf = ns["DOKUHO_REP"].get(name, ("（要確認）", "", ""))
         add("DOKUHO", name, law, rep, basis, conf, "独立行政法人等登記令",
@@ -76,6 +80,11 @@ def catalog_rows():
     for name, rep, basis in ns["SPECIAL_ADMIN"]:
         add("ADMIN", name, _law(basis), rep, basis, "", "管理を命ずる処分は登記・公告される",
             "管理を命ずる処分の決定書・公告、登記事項証明書", "業務の執行・財産の管理処分の権限（代表権）が専属する", True)
+    # 2026-11-21 に追加した行（ROWS のうち MUTOKI 以外の区分）。既存行のコードを動かさないよう最後に並べる
+    for r in ns["ROWS"]:
+        if r["grp"] != "MUTOKI":
+            add(r["grp"], r["name"], r["law"], r["rep"], r["rep_b"], r["conflict"], r["reg"], r["docs"], r["note"], r["ok"],
+                r["day"])
 
     cnt = {}
     for r in out:
