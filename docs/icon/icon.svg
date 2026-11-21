@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <rect width="512" height="512" rx="110" fill="#E3F2FF"/>
+  <g stroke="#5A4636" stroke-width="12" stroke-linejoin="round" stroke-linecap="round">
+    <ellipse cx="256" cy="440" rx="170" ry="24" fill="#BFE3A8" stroke="none"/>
+    <!-- 会社キャラ（ネクタイ姿＝代表者） -->
+    <rect x="116" y="96" width="280" height="336" rx="40" fill="#FFD27A"/>
+    <rect x="116" y="96" width="280" height="64" rx="32" fill="#F5B451"/>
+    <rect x="132" y="106" width="248" height="62" rx="8" fill="#FFFFFF"/>
+    <rect x="156" y="196" width="56" height="46" rx="10" fill="#FFFFFF"/>
+    <rect x="300" y="196" width="56" height="46" rx="10" fill="#FFFFFF"/>
+    <circle cx="196" cy="290" r="11" fill="#5A4636" stroke="none"/>
+    <circle cx="316" cy="290" r="11" fill="#5A4636" stroke="none"/>
+    <path d="M234 312 Q256 334 278 312" fill="none"/>
+    <ellipse cx="168" cy="318" rx="20" ry="12" fill="#F7A6B4" stroke="none"/>
+    <ellipse cx="344" cy="318" rx="20" ry="12" fill="#F7A6B4" stroke="none"/>
+    <path d="M232 348 L280 348 L256 372 Z" fill="#E8544E"/>
+    <path d="M256 372 L240 432 L272 432 Z" fill="#E8544E"/>
+    <!-- 手 -->
+    <path d="M116 330 Q80 300 84 262" fill="none" stroke="#F5B451" stroke-width="26"/>
+    <circle cx="84" cy="252" r="18" fill="#FFE1C4"/>
+    <path d="M396 330 Q432 300 428 262" fill="none" stroke="#F5B451" stroke-width="26"/>
+    <circle cx="428" cy="252" r="18" fill="#FFE1C4"/>
+  </g>
+  <!-- きらきら -->
+  <g fill="#FFC83D" stroke="#5A4636" stroke-width="6" stroke-linejoin="round">
+    <path d="M430 92 l10 24 l24 10 l-24 10 l-10 24 l-10 -24 l-24 -10 l24 -10 z"/>
+    <path d="M70 120 l7 16 l16 7 l-16 7 l-7 16 l-7 -16 l-16 -7 l16 -7 z"/>
+  </g>
+  <text x="256" y="153" font-family="Noto Serif CJK JP" font-weight="900" font-size="44" letter-spacing="2" fill="#3A2A1E" text-anchor="middle">当事者目録</text>
+</svg>
