@@ -108,3 +108,12 @@ input[type="search"], input[type="text"] {
 .notice { background: #fff4ce; border: 1px solid #e8d48b; border-radius: 6px; padding: 0.6em 0.9em; font-size: 0.9em; }
 
 .foot { max-width: 960px; margin: 2em auto 1em; padding: 0 1em; color: var(--sub); font-size: 0.82em; }
+
+/* 広い画面：左に一覧、右に詳細 */
+main:has(.split) { max-width: 1400px; }
+.split { display: grid; grid-template-columns: minmax(320px, 2fr) 3fr; gap: 1.4em; align-items: start; }
+.split .pane-l { position: sticky; top: 3.6em; max-height: calc(100vh - 4.6em); overflow: auto; padding-right: 0.4em; }
+.split .pane-r { min-width: 0; }
+.split .back-list { display: none; }
+.split .pick { margin-top: 3em; text-align: center; }
+.list a.row.active { background: var(--primary-light); }
