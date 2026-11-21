@@ -1,0 +1,32 @@
+name: 誤りの報告
+description: 判定結果や一覧の内容の誤りを報告する
+title: "[報告] "
+labels: ["報告"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        アプリの「誤りを報告」から開くと、対象（ルールのコード・回答・一覧の行）が入った状態になります。
+        事件の当事者名など、個別の事件を特定できる情報は書かないでください。
+  - type: textarea
+    id: target
+    attributes:
+      label: 対象
+      description: ルールのコードと回答、又は一覧の行（コード・名称）
+    validations:
+      required: true
+  - type: textarea
+    id: detail
+    attributes:
+      label: 誤りの内容と、正しいと考える内容
+    validations:
+      required: true
+  - type: textarea
+    id: source
+    attributes:
+      label: 根拠
+      description: 条文・裁判例・条例・規約・登記などと、確認した日
+  - type: input
+    id: contact
+    attributes:
+      label: 補足（任意）

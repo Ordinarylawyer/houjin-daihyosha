@@ -1,0 +1,6 @@
+[project]
+name = "houjin-daihyosha"
+version = "1.0.0"
+description = "法人の裁判上の代表者 判定（判定ルール・データ・Webアプリ）"
+requires-python = ">=3.11"
+dependencies = []
