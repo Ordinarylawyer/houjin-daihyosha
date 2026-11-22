@@ -699,21 +699,21 @@ def ckl(tp, name, law, order, rep_basis, kansa_basis, gentei_help, s353, s364, d
                    "限定できるのは組合員の総数が政令で定める基準を超えない組合だけです（会計監査人の監査を要する組合を除く）。"
                    "定款に限定の定めがあっても、組合員の総数がこの基準を超えていないかを確認してください。")
     R(tp, "D1", 20, "S=N;T=D;GL=N", "監事", "監事", f"{kansa_basis}において準用する会社法386条1項1号",
-      docs=teikan_n + "、" + DOC_KANJI(), note=gentei_note)
+      docs=teikan_n + "、" + DOC_KANJI(), note=gentei_note, vdate="2026-11-22")
     R(tp, "D2", 21, "S=N;T=Q;GL=N", "監事", "監事", f"{kansa_basis}において準用する会社法386条2項1号・2号",
-      docs=teikan_n + "、" + DOC_KANJI(), note=gentei_note)
+      docs=teikan_n + "、" + DOC_KANJI(), note=gentei_note, vdate="2026-11-22")
     R(tp, "D3", 22, "S=N;T=D;GL=Y;GD=A", "総会が当該訴えについて定めた者", "（定められた者の資格）",
-      f"{s353}において準用する会社法353条", docs=DOC_CORP + "、総会議事録、" + teikan_y, note=gentei_note)
+      f"{s353}において準用する会社法353条", docs=DOC_CORP + "、総会議事録、" + teikan_y, note=gentei_note, vdate="2026-11-22")
     R(tp, "D4", 23, "S=N;T=D;GL=Y;GD=B", "理事会が当該訴えについて定めた者", "（定められた者の資格）",
-      f"{s364}において準用する会社法364条", docs=DOC_CORP + "、理事会議事録、" + teikan_y, note=gentei_note)
+      f"{s364}において準用する会社法364条", docs=DOC_CORP + "、理事会議事録、" + teikan_y, note=gentei_note, vdate="2026-11-22")
     # 監査権限限定組合で、総会・理事会が定めていない（理事との訴え）／386条2項が準用されない（請求・告知の受領）
     R(tp, "D5", 24, "S=N;T=D;GL=Y;GD=C;V=N", "代表理事", "代表理事",
       f"{rep_basis}（{s353}において準用する会社法353条・364条による定めがない場合）",
       docs=DOC_CORP + "、" + teikan_y + "。総会又は理事会が当該訴えについて代表者を定めていないことは、総会・理事会の議事録で確認",
-      note=gentei_note)
+      note=gentei_note, vdate="2026-11-22")
     R(tp, "D6", 25, "S=N;T=Q;GL=Y;V=N", "代表理事", "代表理事",
       f"{rep_basis}（監査権限限定組合には会社法386条2項が準用されない）", docs=DOC_CORP + "、" + teikan_y,
-      note=gentei_note)
+      note=gentei_note, vdate="2026-11-22")
     R(tp, "G1", 60, "S=N;V=N", "代表理事", "代表理事", rep_basis, docs=DOC_CORP)
     R(tp, "G2", 61, "S=N;V=K", "代表理事職務代行者", "代表理事職務代行者", "民事保全法56条",
       docs=DOC_CORP + "（仮処分の登記）")
