@@ -93,7 +93,10 @@ function judge() {
     } else if (["ET-L2", "ET-L7"].includes(r.code)) {
       const kanji = c.conf_rep.includes("監事");
       r = { ...r, rep: c.conf_rep, basis: c.conf_rep, kind: "代表者", verified: c.src,
-        docs: kanji ? "法人の登記事項証明書（法人の存在と代表者の確認。監事は登記されないことが多い）、監事の選任（任命）を証する書面"
+        docs: kanji ? "法人の登記事項証明書（法人の存在と代表者の確認。監事は登記されないことが多い）、監事の選任（任命）を証する書面" +
+            // 監事の代表が定款次第の法人は定款も要る（監査権限限定組合になりうる法人／定款で定めるところにより監事が代表する法人）
+            (c.conf_rep.includes("監査権限限定") ? "、定款（監事の監査の範囲を会計に限定する定めの有無の確認。最新のもの）"
+              : c.conf_rep.includes("定款で定めるところにより") ? "、定款（監事が代表する旨の定めの確認）" : "")
           : c.conf_rep.includes("特別代理人") ? "特別代理人選任決定（書）" : c.docs,
         note: `通常の代表者は ${c.rep}（${c.basis}）。` +
           (kanji ? "監事は登記されない法人が多いので、監事の選任を証する書面で確認してください。" : "") +
