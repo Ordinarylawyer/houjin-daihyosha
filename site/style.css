@@ -13,7 +13,7 @@
 * { box-sizing: border-box; }
 body {
   margin: 0; background: var(--bg); color: var(--text);
-  font-family: "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic UI", "Meiryo", system-ui, sans-serif;
+  font-family: "BIZ UDPGothic", "Yu Gothic UI", "Meiryo", "Hiragino Sans", "Noto Sans JP", sans-serif;
   font-size: 15px; line-height: 1.6;
 }
 a { color: var(--primary); }
@@ -107,7 +107,11 @@ input[type="search"], input[type="text"] {
 .warn { color: var(--warn); }
 .notice { background: #fff4ce; border: 1px solid #e8d48b; border-radius: 6px; padding: 0.6em 0.9em; font-size: 0.9em; }
 
-.foot { max-width: 960px; margin: 2em auto 1em; padding: 0 1em; color: var(--sub); font-size: 0.82em; }
+/* 欄外の記載（姉妹アプリと同じ書き方） */
+.license { max-width: 960px; margin: 8px auto 0; padding: 0 1em; font-size: 12px; color: var(--sub); }
+.license:first-of-type { margin-top: 2em; }
+.license:last-of-type { margin-bottom: 1em; }
+.license a { color: var(--sub); }
 
 /* 広い画面：左に一覧、右に詳細 */
 main:has(.split) { max-width: 1400px; }
