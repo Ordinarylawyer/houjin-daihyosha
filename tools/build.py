@@ -334,7 +334,26 @@ def write_web(crows, krows):
     return len(srows)
 
 
+def stamp_assets():
+    """index.html の style.css・app.js に内容のハッシュを付け、古いファイルがブラウザのキャッシュに残らないようにする。"""
+    import hashlib
+    import re
+    site = os.path.join(ROOT, "site")
+    path = os.path.join(site, "index.html")
+    with open(path, encoding="utf-8") as f:
+        html = f.read()
+    new = html
+    for name in ("style.css", "app.js"):
+        with open(os.path.join(site, name), "rb") as f:
+            h = hashlib.sha1(f.read()).hexdigest()[:8]
+        new = re.sub(re.escape(name) + r'(\?v=[0-9a-f]+)?"', f'{name}?v={h}"', new)
+    if new != html:
+        with open(path, "w", encoding="utf-8", newline="\n") as f:
+            f.write(new)
+
+
 def main():
+    stamp_assets()
     errs, warns, stats = check()
     errs += simulate()
     os.makedirs(os.path.join(ROOT, "tests"), exist_ok=True)
