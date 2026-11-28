@@ -23,6 +23,8 @@ a { color: var(--primary); }
   background: var(--primary); color: #fff; padding: 0.7em 1em;
 }
 .top .brand { color: #fff; font-weight: 600; font-size: 1.15em; text-decoration: none; }
+.top .brand { display: flex; align-items: center; gap: 8px; }
+.top .brand img { border-radius: 6px; background: #fff; flex: none; }
 .top .step { font-size: 0.9em; opacity: 0.9; text-align: right; }
 main { max-width: 960px; margin: 0 auto; padding: 1em; }
 .loading { color: var(--sub); }
